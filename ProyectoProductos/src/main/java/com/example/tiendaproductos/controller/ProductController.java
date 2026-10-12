@@ -46,10 +46,10 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<ProductResponse> save(@Valid  @RequestBody ProductRequest product){
-        /*service.save(product);
+        //service.save(product);
         if (product.name().isEmpty()){
             ResponseEntity.badRequest().body("No puede estar vació, dame un nombre...");
-        }*/
+        }
         Product productSaved = service.save(toEntity(product)); //Para igualar las entity
 
         return ResponseEntity.status(HttpStatus.CREATED).body( toResponse(productSaved) ) ;
@@ -68,7 +68,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> putMethod(@Valid @PathVariable Long id, @RequestBody ProductRequest product){
         Optional<Product> optional = service.update(id, toEntity(product));
         if (optional.isPresent()){
-            return ResponseEntity.status(HttpStatus.CREATED).body( toResponse(optional.get()) );
+            return ResponseEntity.status(HttpStatus.OK).body( toResponse(optional.get()) );
         }
         //return ResponseEntity.ok(optional.get()); es para pasar el objeto es con un body para que regrese algo, el build() es para regresar nada
         return ResponseEntity.notFound().build();
