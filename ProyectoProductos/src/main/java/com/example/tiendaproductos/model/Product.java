@@ -1,12 +1,6 @@
 package com.example.tiendaproductos.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.persistence.*;
 
 @Entity
 public class Product {
@@ -18,11 +12,16 @@ public class Product {
     private int stock;
     private double price;
 
-    public Product(Long id, String name, int stock, double price ){
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    public Product(Long id, String name, int stock, double price, Category category ){
         this.id = id;
         this.name = name;
         this.stock = stock;
         this.price = price;
+        this.category = category;
     }
 
     public Product(){}
@@ -41,5 +40,9 @@ public class Product {
 
     public double getPrice() { return price; }
 
-    public void setPrice(double price) { this.price = price;  }
+    public void setPrice(double price) { this.price = price; }
+
+    public Category getCategory() { return category; }
+
+    public void setCategory(Category category) { this.category = category; }
 }

@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping ("/products")
 public class ProductController {
-    private ProductService service;
+    private final ProductService service;
 
     public ProductController(ProductService service){
         this.service = service;
@@ -34,23 +34,20 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id){
         Optional<Product> product = service.findById(id); //product es una entity y
-        if (product.isPresent()){
-                                     //Esto es para parsearlo, para que sea del mismo tipo
+        if (product.isPresent()){//Esto es para parsearlo, para que sea del mismo tipo
             return ResponseEntity.ok( toResponse(product.get()) );
         }else {
             return ResponseEntity.notFound().build();
         }
-
-
     }
 
     @PostMapping()
     public ResponseEntity<ProductResponse> save(@Valid  @RequestBody ProductRequest product){
         //service.save(product);
-        if (product.name().isEmpty()){
+        /*if (product.name().isEmpty()){
             ResponseEntity.badRequest().body("No puede estar vació, dame un nombre...");
-        }
-        Product productSaved = service.save(toEntity(product)); //Para igualar las entity
+        }*/
+        Product productSaved = service.save(toEntity(product), product.categoryId()); //Para igualar las entity
 
         return ResponseEntity.status(HttpStatus.CREATED).body( toResponse(productSaved) ) ;
     }
@@ -65,7 +62,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> putMethod(@Valid @PathVariable Long id, @RequestBody ProductRequest product){
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductRequest product){
         Optional<Product> optional = service.update(id, toEntity(product));
         if (optional.isPresent()){
             return ResponseEntity.status(HttpStatus.OK).body( toResponse(optional.get()) );
@@ -75,7 +72,13 @@ public class ProductController {
     }
 
     private ProductResponse toResponse(Product product){
-        return new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getStock());
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStock(),
+                0L,
+                " ");
     }
 
     private Product toEntity(ProductRequest request){
@@ -86,4 +89,5 @@ public class ProductController {
 
         return product;
     }
+
 }

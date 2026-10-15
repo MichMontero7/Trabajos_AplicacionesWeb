@@ -5,12 +5,16 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public record ProductRequest(
-        @NotBlank(message = "Name is mandatory")
+        @NotBlank(message = "No debe haber vació, ni ser menor que 0")
         String name,
         @PositiveOrZero
+        @NotNull
         Double price,
         @Positive
-        int stock
+        @NotNull
+        int stock,
+        @NotNull
+        Long categoryId
 ) {
 
 }
