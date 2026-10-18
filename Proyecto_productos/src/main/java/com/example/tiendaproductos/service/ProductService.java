@@ -1,5 +1,6 @@
 package com.example.tiendaproductos.service;
 
+import com.example.tiendaproductos.exception.ResourceNotFoundException;
 import com.example.tiendaproductos.model.Category;
 import com.example.tiendaproductos.model.Product;
 import com.example.tiendaproductos.repository.CategoryRepository;
@@ -28,23 +29,30 @@ public class ProductService {
     }
 
     public Product save(Product product, Long categoryId){
-        Category category = repoCategory.findById(categoryId).orElseThrow(); //Arroja un error cuando no encuentre el optional para cat
-        //entonces arroja un error
+        Category category = repoCategory.findById(categoryId).orElseThrow(
+                ()-> new ResourceNotFoundException("Category not found with id: " + categoryId)
+        ); //Arroja un error cuando no encuentre el optional para cat
         product.setCategory(category);
         return repo.save(product);
     }
 
-    public Optional<Product> update(Long id, Product product){
-        Optional<Product> optional = repo.findById(id);
-        if (optional.isEmpty()){
-            return optional.empty();
-        }
+    public Optional<Product> update(Long id, Product product, Long categoryId){
 
-        Product productDB = optional.get();
-        productDB.setName(product.getName());
+        Product productDB = repo.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Product not found with id: " + id)
+        );
+        Category category = repoCategory.findById(categoryId).orElseThrow(
+                () -> new ResourceNotFoundException("Category not found with id: " + categoryId)
+        );
+        /*if (optional.isEmpty()){
+            return optional.empty();
+        }*/
+        //Product productDB = optional.get();
+
+        productDB.setName(product.getName()+""); // el +"" es para forzar que sea string
         productDB.setPrice(product.getPrice());
         productDB.setStock(product.getStock());
-
+        productDB.setCategory(category);
         return Optional.of(repo.save(productDB));
     }
 

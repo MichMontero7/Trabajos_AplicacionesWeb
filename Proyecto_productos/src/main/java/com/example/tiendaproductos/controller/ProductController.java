@@ -43,13 +43,13 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<ProductResponse> save(@Valid  @RequestBody ProductRequest product){
-        //service.save(product);
-        /*if (product.name().isEmpty()){
-            ResponseEntity.badRequest().body("No puede estar vació, dame un nombre...");
-        }*/
         Product productSaved = service.save(toEntity(product), product.categoryId()); //Para igualar las entity
 
         return ResponseEntity.status(HttpStatus.CREATED).body( toResponse(productSaved) ) ;
+        /*service.save(product);
+        if (product.name().isEmpty()){
+            ResponseEntity.badRequest().body("No puede estar vació, dame un nombre...");
+        }*/
     }
 
     @DeleteMapping("/{id}")
@@ -63,7 +63,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductRequest product){
-        Optional<Product> optional = service.update(id, toEntity(product));
+        Optional<Product> optional = service.update(id, toEntity(product), product.categoryId());
         if (optional.isPresent()){
             return ResponseEntity.status(HttpStatus.OK).body( toResponse(optional.get()) );
         }
@@ -91,3 +91,4 @@ public class ProductController {
     }
 
 }
+//El optional es para no general nulos al vuelo, si es nulo regresa un optional...
