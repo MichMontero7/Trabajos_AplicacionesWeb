@@ -1,7 +1,9 @@
 package com.example.tiendaproductos.controller;
 
+import com.example.tiendaproductos.dto.PalabraRequest;
 import com.example.tiendaproductos.dto.ProductRequest;
 import com.example.tiendaproductos.dto.ProductResponse;
+import com.example.tiendaproductos.exception.ResourceNotFoundException;
 import com.example.tiendaproductos.model.Product;
 import com.example.tiendaproductos.service.ProductService;
 import jakarta.validation.Valid;
@@ -33,12 +35,15 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id){
-        Optional<Product> product = service.findById(id); //product es una entity y
-        if (product.isPresent()){//Esto es para parsearlo, para que sea del mismo tipo
+        Product product = service.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Product not found with id: " + id)
+        );
+        /*if (product.isPresent()){//Esto es para parsearlo, para que sea del mismo tipo
             return ResponseEntity.ok( toResponse(product.get()) );
         }else {
             return ResponseEntity.notFound().build();
-        }
+        }*/
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping()
@@ -63,12 +68,20 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductRequest product){
-        Optional<Product> optional = service.update(id, toEntity(product), product.categoryId());
-        if (optional.isPresent()){
+        Product optional = service.update(id, toEntity(product), product.categoryId());
+        /*if (optional.isPresent()){
             return ResponseEntity.status(HttpStatus.OK).body( toResponse(optional.get()) );
         }
-        //return ResponseEntity.ok(optional.get()); es para pasar el objeto es con un body para que regrese algo, el build() es para regresar nada
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(optional.get()); es para pasar el objeto es con un body para que regrese algo, el build() es para regresar nada
+        return ResponseEntity.notFound().build();*/
+        return ResponseEntity.ok(toResponse(optional));
+    }
+
+    @PatchMapping("/{id}/add-remove")
+    public ResponseEntity<ProductResponse> addRemove(@PathVariable Long id, @Valid @RequestBody PalabraRequest request) {
+        Product addOrRemove = service.modify(id, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body( toResponse(addOrRemove) );
     }
 
     private ProductResponse toResponse(Product product){

@@ -1,5 +1,7 @@
 package com.example.tiendaproductos.service;
 
+import com.example.tiendaproductos.dto.PalabraRequest;
+import com.example.tiendaproductos.exception.ResourceConflictException;
 import com.example.tiendaproductos.exception.ResourceNotFoundException;
 import com.example.tiendaproductos.model.Category;
 import com.example.tiendaproductos.model.Product;
@@ -36,7 +38,7 @@ public class ProductService {
         return repo.save(product);
     }
 
-    public Optional<Product> update(Long id, Product product, Long categoryId){
+    public Product update(Long id, Product product, Long categoryId){
 
         Product productDB = repo.findById(id).orElseThrow(
                 ()-> new ResourceNotFoundException("Product not found with id: " + id)
@@ -53,7 +55,7 @@ public class ProductService {
         productDB.setPrice(product.getPrice());
         productDB.setStock(product.getStock());
         productDB.setCategory(category);
-        return Optional.of(repo.save(productDB));
+        return repo.save(productDB);
     }
 
     public boolean delete(Long id){
@@ -62,6 +64,28 @@ public class ProductService {
         }
         repo.deleteById(id);
         return true;
+    }
+
+    public Product modify(long id, PalabraRequest palabra){
+        Product productBD = repo.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Product not found with id: " + id)
+        );
+
+        if (palabra.getWord().equalsIgnoreCase("add") || palabra.getWord().equalsIgnoreCase("remover")){
+            if (palabra.getWord().equalsIgnoreCase("add")){
+                productBD.setStock(productBD.getStock() + palabra.getQuantity());
+            }else {
+                if (palabra.getQuantity() > productBD.getStock()){
+                    throw new ResourceConflictException("No tiene suficiente stock");
+                }else {
+                    productBD.setStock(productBD.getStock() - palabra.getQuantity());
+                }
+            }
+        }else {
+            throw new ResourceNotFoundException("Word not found :(" );
+        }
+
+        return repo.save(productBD);
     }
 
 }
